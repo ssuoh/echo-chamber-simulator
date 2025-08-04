@@ -5,14 +5,14 @@ import matplotlib.pyplot as plt
 import matplotlib
 import os
 
-# フォント設定：ipaexg.ttf が同じディレクトリにある前提
+# フォント設定（ipaexg.ttf 同一ディレクトリ前提）
 font_path = os.path.join(os.path.dirname(__file__), "ipaexg.ttf")
 matplotlib.font_manager.fontManager.addfont(font_path)
 matplotlib.rcParams['font.family'] = 'IPAexGothic'
 
-st.title("アホ圏エコーチェンバー vs 理解　のシミュレーター")
+st.title("アホエコーチェンバー vs 理解進行　のシミュレーター")
 
-# 改善済み初期パラメータ（変化が見えやすいように調整）
+# パラメータ設定（デフォルト：動きやすい値）
 alpha = st.slider("α: 基本理解進行率", 0.0, 1.0, 0.6)
 beta = st.slider("β: エコーチェンバーの妨害", 0.0, 2.0, 0.3)
 gamma = st.slider("γ: アホ参加者の妨害", 0.0, 2.0, 0.4)
@@ -26,7 +26,9 @@ E0 = st.slider("初期エコーチェンバー E₀", 0.0, 2.0, 0.6)
 A0 = st.slider("初期アホ参加者 A₀", 0.0, 2.0, 0.6)
 T = st.slider("シミュレーション時間", 10, 100, 50)
 
-# 微分方程式モデル
+# 対数スケールを使用するか
+use_log_scale = st.checkbox("縦軸を対数スケールにする", value=True)
+
 def model(t, y):
     U, E, A = y
     dUdt = alpha - beta * E - gamma * A
@@ -34,7 +36,7 @@ def model(t, y):
     dAdt = eta * E - zeta * U
     return [dUdt, dEdt, dAdt]
 
-# 非負制約つきで数値解を求める
+# 数値解
 sol = solve_ivp(
     model,
     (0, T),
@@ -43,14 +45,20 @@ sol = solve_ivp(
     method="LSODA"
 )
 
+# 最小値を補正（log(0)回避）
+Y = np.clip(sol.y, 1e-4, None)
+
 # グラフ描画
 fig, ax = plt.subplots(figsize=(10, 5))
-ax.plot(sol.t, sol.y[0], label="理解進行度 U(t)")
-ax.plot(sol.t, sol.y[1], label="エコーチェンバー閉鎖度 E(t)")
-ax.plot(sol.t, sol.y[2], label="アホ数 A(t)")
+ax.plot(sol.t, Y[0], label="理解 U(t)")
+ax.plot(sol.t, Y[1], label="エコーチェンバー E(t)")
+ax.plot(sol.t, Y[2], label="アホ A(t)")
 ax.set_xlabel("時間 t")
 ax.set_ylabel("値")
-ax.set_title("社会的力学モデルの可視化（改善済み）")
+ax.set_title("社会的力学モデルの可視化" + ("（対数スケール）" if use_log_scale else ""))
+if use_log_scale:
+    ax.set_yscale("log")
+    ax.set_ylim(bottom=1e-4)
 ax.legend()
 ax.grid(True)
 st.pyplot(fig)
