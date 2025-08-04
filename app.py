@@ -3,6 +3,7 @@ import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 
+matplotlib.rcParams['font.family'] = 'IPAPGothic'  # or 'Noto Sans CJK JP'
 st.title("アホエコーチェンバー vs 内容理解　のシミュレーター")
 
 alpha = st.slider("α: 基本理解進行率", 0.0, 1.0, 0.5)
