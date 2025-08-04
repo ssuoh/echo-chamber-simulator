@@ -2,6 +2,13 @@ import streamlit as st
 import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
+import matplotlib
+import os
+
+# ipaexg.ttf が同じディレクトリにある前提で日本語フォントを設定
+font_path = os.path.join(os.path.dirname(__file__), "ipaexg.ttf")
+matplotlib.font_manager.fontManager.addfont(font_path)
+matplotlib.rcParams['font.family'] = 'IPAexGothic'
 
 st.title("エコーチェンバー vs 理解のシミュレーター")
 
