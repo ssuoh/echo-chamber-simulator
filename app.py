@@ -10,7 +10,7 @@ font_path = os.path.join(os.path.dirname(__file__), "ipaexg.ttf")
 matplotlib.font_manager.fontManager.addfont(font_path)
 matplotlib.rcParams['font.family'] = 'IPAexGothic'
 
-st.title("エコーチェンバー vs 理解のシミュレーター")
+st.title("アホアホエコーチェンバー vs 内容理解　のシミュレーター")
 
 alpha = st.slider("α: 基本理解進行率", 0.0, 1.0, 0.5)
 beta = st.slider("β: エコーチェンバーの妨害", 0.0, 2.0, 0.8)
