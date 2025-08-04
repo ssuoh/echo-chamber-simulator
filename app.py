@@ -2,15 +2,18 @@ import streamlit as st
 import numpy as np
 from scipy.integrate import solve_ivp
 import plotly.express as px
-import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
 import os
+import pandas as pd
 
-# フォント設定（matplotlib使用時に備えて）
+# フォント設定（互換性の高い方法で設定）
 font_path = os.path.join(os.path.dirname(__file__), "ipaexg.ttf")
-matplotlib.font_manager.fontManager.addfont(font_path)
-matplotlib.rcParams['font.family'] = 'IPAexGothic'
+if os.path.exists(font_path):
+    font_prop = fm.FontProperties(fname=font_path)
+    plt.rcParams["font.family"] = font_prop.get_name()
 
-st.title("アホエコーチェンバー vs 内容理解進行　のアニメーション（Plotly）")
+st.title("アホエコーチェンバー vs 内容理解のアニメーション")
 
 # パラメータスライダー
 alpha = st.slider("α: 基本理解進行率", 0.0, 1.0, 0.6)
@@ -19,7 +22,7 @@ gamma = st.slider("γ: アホ参加者の妨害", 0.0, 2.0, 0.4)
 delta = st.slider("δ: アホ→エコーチェンバー強化", 0.0, 2.0, 0.7)
 epsilon = st.slider("ε: 理解によるエコーチェンバー抑制", 0.0, 1.0, 0.4)
 eta = st.slider("η: エコーチェンバー→アホ誘発", 0.0, 2.0, 0.6)
-zeta = st.slider("ζ: 内容理解によるアホ抑制", 0.0, 1.0, 0.5)
+zeta = st.slider("ζ: 理解によるアホ抑制", 0.0, 1.0, 0.5)
 
 U0 = st.slider("初期理解 U₀", 0.0, 2.0, 0.5)
 E0 = st.slider("初期エコーチェンバー E₀", 0.0, 2.0, 0.6)
@@ -43,8 +46,7 @@ sol = solve_ivp(
     method="LSODA"
 )
 
-# DataFrame化
-import pandas as pd
+# データフレームに変換
 df = pd.DataFrame({
     "時間": sol.t,
     "理解 U": sol.y[0],
@@ -52,7 +54,7 @@ df = pd.DataFrame({
     "アホ A": sol.y[2],
 })
 
-# アニメーションプロット（U vs E, サイズ=A）
+# Plotlyアニメーションプロット
 fig = px.scatter(
     df,
     x="理解 U",
