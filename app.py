@@ -5,26 +5,28 @@ import matplotlib.pyplot as plt
 import matplotlib
 import os
 
-# ipaexg.ttf が同じディレクトリにある前提で日本語フォントを設定
+# フォント設定：ipaexg.ttf が同じディレクトリにある前提
 font_path = os.path.join(os.path.dirname(__file__), "ipaexg.ttf")
 matplotlib.font_manager.fontManager.addfont(font_path)
 matplotlib.rcParams['font.family'] = 'IPAexGothic'
 
-st.title("アホアホエコーチェンバー vs 内容理解　のシミュレーター")
+st.title("アホ圏エコーチェンバー vs 理解　のシミュレーター")
 
-alpha = st.slider("α: 基本理解進行率", 0.0, 1.0, 0.5)
-beta = st.slider("β: エコーチェンバーの妨害", 0.0, 2.0, 0.8)
-gamma = st.slider("γ: アホ参加者の妨害", 0.0, 2.0, 0.6)
+# 改善済み初期パラメータ（変化が見えやすいように調整）
+alpha = st.slider("α: 基本理解進行率", 0.0, 1.0, 0.6)
+beta = st.slider("β: エコーチェンバーの妨害", 0.0, 2.0, 0.3)
+gamma = st.slider("γ: アホ参加者の妨害", 0.0, 2.0, 0.4)
 delta = st.slider("δ: アホ→エコーチェンバー強化", 0.0, 2.0, 0.7)
 epsilon = st.slider("ε: 理解によるエコーチェンバー抑制", 0.0, 1.0, 0.4)
-eta = st.slider("η: エコーチェンバー→アホ誘発", 0.0, 2.0, 0.5)
-zeta = st.slider("ζ: 理解によるアホ抑制", 0.0, 1.0, 0.3)
+eta = st.slider("η: エコーチェンバー→アホ誘発", 0.0, 2.0, 0.6)
+zeta = st.slider("ζ: 理解によるアホ抑制", 0.0, 1.0, 0.5)
 
-U0 = st.slider("初期理解 U₀", 0.0, 1.0, 0.1)
-E0 = st.slider("初期エコーチェンバー E₀", 0.0, 1.0, 0.5)
-A0 = st.slider("初期アホ参加者 A₀", 0.0, 1.0, 0.5)
+U0 = st.slider("初期理解 U₀", 0.0, 2.0, 0.5)
+E0 = st.slider("初期エコーチェンバー E₀", 0.0, 2.0, 0.6)
+A0 = st.slider("初期アホ参加者 A₀", 0.0, 2.0, 0.6)
 T = st.slider("シミュレーション時間", 10, 100, 50)
 
+# 微分方程式モデル
 def model(t, y):
     U, E, A = y
     dUdt = alpha - beta * E - gamma * A
@@ -32,15 +34,23 @@ def model(t, y):
     dAdt = eta * E - zeta * U
     return [dUdt, dEdt, dAdt]
 
-sol = solve_ivp(model, (0, T), [U0, E0, A0], t_eval=np.linspace(0, T, 500))
+# 非負制約つきで数値解を求める
+sol = solve_ivp(
+    model,
+    (0, T),
+    [U0, E0, A0],
+    t_eval=np.linspace(0, T, 500),
+    method="LSODA"
+)
 
+# グラフ描画
 fig, ax = plt.subplots(figsize=(10, 5))
-ax.plot(sol.t, sol.y[0], label="理解 U(t)")
-ax.plot(sol.t, sol.y[1], label="エコーチェンバー E(t)")
-ax.plot(sol.t, sol.y[2], label="アホ A(t)")
+ax.plot(sol.t, sol.y[0], label="理解進行度 U(t)")
+ax.plot(sol.t, sol.y[1], label="エコーチェンバー閉鎖度 E(t)")
+ax.plot(sol.t, sol.y[2], label="アホ数 A(t)")
 ax.set_xlabel("時間 t")
 ax.set_ylabel("値")
-ax.set_title("社会的力学モデルの可視化")
+ax.set_title("社会的力学モデルの可視化（改善済み）")
 ax.legend()
 ax.grid(True)
 st.pyplot(fig)
