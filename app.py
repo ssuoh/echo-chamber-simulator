@@ -2,9 +2,18 @@ import streamlit as st
 import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
+from matplotlib import font_manager
+import os
 
-matplotlib.rcParams['font.family'] = 'IPAPGothic'  # or 'Noto Sans CJK JP'
-st.title("アホエコーチェンバー vs 内容理解　のシミュレーター")
+# IPAフォントの明示的指定（配置済み前提）
+font_path = "ipaexg.ttf"
+if os.path.exists(font_path):
+    jp_font = font_manager.FontProperties(fname=font_path)
+    plt.rcParams["font.family"] = jp_font.get_name()
+else:
+    st.warning("ipaexg.ttf が見つかりません。日本語ラベルが表示されない可能性があります。")
+
+st.title("アホエコーチェンバー vs 内容理解のシミュレーター")
 
 alpha = st.slider("α: 基本理解進行率", 0.0, 1.0, 0.5)
 beta = st.slider("β: エコーチェンバーの妨害", 0.0, 2.0, 0.8)
