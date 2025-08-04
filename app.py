@@ -7,7 +7,7 @@ import matplotlib.font_manager as fm
 import os
 import pandas as pd
 
-# フォント設定（互換性の高い方法で設定）
+# フォント設定（互換性重視：古いmatplotlibでもOK）
 font_path = os.path.join(os.path.dirname(__file__), "ipaexg.ttf")
 if os.path.exists(font_path):
     font_prop = fm.FontProperties(fname=font_path)
@@ -37,13 +37,13 @@ def model(t, y):
     dAdt = eta * E - zeta * U
     return [dUdt, dEdt, dAdt]
 
-# 数値解
+# RK45で数値解（LSODAより安定・スレッド安全）
 sol = solve_ivp(
     model,
     (0, T),
     [U0, E0, A0],
     t_eval=np.linspace(0, T, 200),
-    method="LSODA"
+    method="RK45"
 )
 
 # データフレームに変換
